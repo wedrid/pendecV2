@@ -55,7 +55,7 @@ class RegressioneLineare(Funzione):
         #il gradiente della "penalizzazione" è grad(||x-y||^2) = 2(x-y) (valore assoluto non c'è più quindi? TODO )
         penalGradient = tau * (x-y) #qui c'è solo tau perchè (tau/2) * 2
         qTauXGradient = (fGradient + penalGradient)
-        print("Gradiente:\n " + str(qTauXGradient))
+        #print("Gradiente:\n " + str(qTauXGradient))
         return qTauXGradient
         
 
@@ -63,3 +63,45 @@ class RegressioneLineare(Funzione):
         norma = np.linalg.norm(self.getQTauXGradient(tau, x, y))
         print("Norma = " + str(norma))
         return norma
+
+    def getFeasibleYQTauArgminGivenX(self, tau, x, constraint):
+        return self.chiariniAnaliticSM(x, constraint)
+
+    def chiariniAnaliticSM(self,u,s):
+        i=0
+        u_temp=[]
+        while i<len(u):
+            if type(u[i])==int:
+                if(u[i])<0:
+                    u_temp.insert(i,-u[i])
+                else:
+                    u_temp.insert(i,u[i])
+            else:
+                if (u[i][0])<0:
+                    u_temp.insert(i,-u[i][0])
+                else:
+                    u_temp.insert(i,u[i][0])
+            i+=1
+        u_temp.sort()
+        u_temp.reverse()
+        u=np.array(u)
+        i=s
+        while i<len(u_temp):
+            j=0
+            flag=0
+            while j<len(u) and flag==0:
+                if u_temp[i]==u[j][0] or u_temp[i]==-u[j][0]:
+                    flag=1
+                if flag!=1:
+                    j+=1
+            if flag==1:
+                u[j][0]=0
+            i+=1
+        x=[]
+        k=0
+        while k<len(u):
+            x.append([])
+            x[k].insert(0,u[k][0])
+            k+=1
+        y=np.array(x)
+        return y.transpose()

@@ -11,10 +11,12 @@ class Funzione:
     def getQTauXArgminGivenY(self, tau, y):
         return "This is abstract"
     
+    # TODO this seems to be [BROKEN]
     def getFeasibleYQTauArgminGivenX(self, tau, x, constraint):
         self.xTemp = x
         self.tauTemp = tau
         ottimo = minimize(self.getValueOfPenalizationTermHelper, x, method='Nelder-Mead')
+        print(ottimo)
         x = ottimo.x
         
         self._makeFeasible(x, constraint)
@@ -23,7 +25,9 @@ class Funzione:
 
     
     def getValueOfPenalizationTermHelper(self, y):
-        return self.getValueOfPenalizationTerm(self.tauTemp, self.xTemp, y)
+        print(self.xTemp)
+        print(y)
+        return np.linalg.norm(self.xTemp-y)**2
 
     def getValueOfPenalizationTerm(self, tau, x, y): #TODO check
         return 0.5 * tau * (np.linalg.norm(x-y))**2
@@ -58,7 +62,7 @@ class Funzione:
 
     def qTauGradHelper(self, x):
         xt = np.matrix(x).transpose()
-        print("[GradHelper]>>>>>>>>>>>>>>>> xt\n" + str(xt))
+        #print("[GradHelper]>>>>>>>>>>>>>>>> xt\n" + str(xt))
 
         ret = self.getQTauXGradient(self.tauTemp, xt, self.yTemp).transpose()
         #print("RETURNNNNNNNNNNN" + str(np.squeeze(np.asarray(ret))))
