@@ -39,6 +39,7 @@ class PenaltyDecomposition:
             return
         else:
             self.x.append(x_0)
+            print("[PENALTY DECOMPOSITION] x_0 is " + str(x_0))
         self.y.append(copy.deepcopy(self.x[0]))
 
         if(epsilon_succession is None):
@@ -59,21 +60,24 @@ class PenaltyDecomposition:
     def start(self):
         k = 0
         epsilon = 0.01
-        while k < self.max_iterations:
+        while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
             u = copy.deepcopy(self.x[k])
 
-            min_xQtauk = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.matrix(np.ones(self.fun.number_of_x))).fun
+            #min_xQtauk = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.matrix(np.ones(self.fun.number_of_x))).fun
+            argmin_xQtau = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.array(np.ones(self.fun.number_of_x))) #nota: nel caso della regressione lineare il terzo parametro è inutilizzato
+            print("ARGMIN: "+ str(argmin_xQtau))
+            min_xQtauk = self.fun.getQTauValue(self.tau, argmin_xQtau, self.y[k])
             if min_xQtauk <= self.gamma:
                 v = copy.deepcopy(self.y[k])
             else:
                 v = copy.deepcopy(self.y[0])
             first = None
             
-            while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon:
+            while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon: #TODO criterio per funzione che decresce di poco
                 #primo blocco
                 
-                u = self.fun.getQTauOttimoGivenY(self.tau, v, np.matrix(np.ones(self.fun.number_of_x))).x
-                u = np.matrix(u).transpose()
+                u = self.fun.getQTauOttimoGivenY(self.tau, v, np.matrix(np.ones(self.fun.number_of_x)))
+                #u = np.matrix(u).transpose()
                 #print("u -┐\n" + str(u))
                 #print("Q TAU VALUE is " + str(self.fun.getQTauValue(self.tau, u, v)))
 
@@ -85,7 +89,7 @@ class PenaltyDecomposition:
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
 
-            self.tau = 1.5 * self.tau 
+            self.tau = 1.000001 * self.tau 
             #self.tau = self.alfa * self.tau
             self.x.append(u)
             self.y.append(v)

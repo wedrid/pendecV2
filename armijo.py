@@ -37,10 +37,10 @@ class Armijo:
         
         j = 0
         #print(fun.evaluate_function( x + alfa * direzione))
-        while fun.getQTauValue(tau, x + np.dot(alfa, direzione), y) > fun.getQTauValue(tau, x, y) + cls.gamma*alfa*(np.dot(fun.getQTauXGradient(tau, x, y).transpose(), direzione)):
+        while alfa > 1e-6 and fun.getQTauValue(tau, x + np.dot(alfa, direzione), y) > fun.getQTauValue(tau, x, y) + cls.gamma*alfa*(np.dot(fun.getQTauXGradient(tau, x, y).transpose(), direzione)):
             alfa = cls.delta*alfa
             j+=1 #anche se in realtà non serve funzionalmente.. può però dire in quante iterazioni è terminato l'algoritmo
         
-        print("Armijo: j = " + str(j) + " alfa = " + str(alfa))
+        #print("Armijo: j = " + str(j) + " alfa = " + str(alfa))
         return alfa
         

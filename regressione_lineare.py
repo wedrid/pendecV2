@@ -4,8 +4,8 @@ class RegressioneLineare(Funzione):
 
     def __init__(self, A, b):
         # A is a numpy matrix
-        print(A.shape)
-        print(b.shape)
+        print("Shape of A: " + str(A.shape))
+        print("Shape of b: " + str(b.shape))
         if len(A.shape) > 2:
             print("A non può avere più di due dimensioni")
             return
@@ -38,7 +38,7 @@ class RegressioneLineare(Funzione):
         secondMember =  -1 * np.dot(np.dot(x.transpose(), self.A.transpose()), self.b)
         thirdMember = 0.5 * np.dot(self.b.transpose(), self.b)
 
-        return (firstMember + secondMember + thirdMember)
+        return (firstMember + secondMember + thirdMember)[0][0]
     
     def getValueOfGradientInX(self, x):
         if x.shape != (self.n, 1):
@@ -105,3 +105,14 @@ class RegressioneLineare(Funzione):
             k+=1
         y=np.array(x)
         return y.transpose()
+
+    def getQTauOttimoGivenY(self, tau, y, x0):
+        n = self.n
+
+        At=np.transpose(self.A)
+        first=np.dot(At,self.A)+np.identity(n)*tau
+        first= np.linalg.inv(first)
+        second=np.dot(At,self.b)+tau*y
+        x_star=np.dot(first,second)
+
+        return x_star

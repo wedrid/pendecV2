@@ -74,8 +74,8 @@ class InexactPenaltyDecomposition:
             
             while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon:
                 #primo blocco
-                alfa = Armijo.armijoOnQTau(self.fun, tau = self.tau, x_in=x_temp, y_in=y_temp)
-
+                alfa = Armijo.armijoOnQTau(self.fun, tau = self.tau, x_in=u, y_in=v)
+                print("ALFA: " + str(alfa))
                 u = u - alfa * self.fun.getQTauXGradient(self.tau, u, v)
                 #u = np.matrix(u).transpose()
                 #print("u -┐\n" + str(u))
@@ -85,11 +85,14 @@ class InexactPenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
 
+                #per capire se sto andando in salita o in discesa
+                print(self.fun.getQTauValue(self.tau, u, v))
+
                 #print("v -┐\n" + str(v))
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
 
-            self.tau = 1.2 * self.tau 
+            self.tau = self.gamma * self.tau 
             #self.tau = self.alfa * self.tau
             self.x.append(u)
             self.y.append(v)
@@ -102,6 +105,8 @@ class InexactPenaltyDecomposition:
 
         print("[INEXACT] FINISH: \n" + str(self.y[len(self.y)-1]))
         print("VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+        temp = np.array([[0.05653660635842047, 0.0, -0.2031083583060361, -0.9447476503130903, -0.4078710391440083, 0.0, -0.3890436268275701, -0.638997302470053, -0.7270358330345421, -0.7231540783565926, 1.863556377303855, 0.0, -0.6871298643343594, -0.5590708789547428, 0.0, 0.21798514077189976, 0.43644045042577034, 0.8046240510269675, 0.6743726512283135]]).transpose()
+        print("VAL misto interi " + str(self.fun.getValueInX(temp)))
         print(self.y)
 
 

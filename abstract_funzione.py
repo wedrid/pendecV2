@@ -50,7 +50,9 @@ class Funzione:
 
     def getQTauValue(self, tau, x, y):
         firstMember = self.getValueInX(x)
+        #print("firstMember = " + str(firstMember))
         secondMember = 0.5 * tau * (np.linalg.norm(x-y))**2
+        #print("secondMember = " + str(secondMember))
 
         return (firstMember + secondMember) #dovrebbero essere scalari, controllare TODO
 
