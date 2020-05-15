@@ -72,7 +72,7 @@ class DFPenaltyDecomposition:
     def start(self):
         #the following is one iteration of the outer loop (for k=0,1,..)
         k = 0
-        epsilon = 0.001
+        epsilon = 0.01
         while k < self.max_iterations: 
             l = 0
             alfa_tilde = np.ones(self.number_of_variables*2)
@@ -116,7 +116,7 @@ class DFPenaltyDecomposition:
                 for i in range(0, self.number_of_variables*2): #per tutte le direzioni e antidirezioni cardinali... 
                     #i = randir[j]
                     alfa_temp = DFLineSearch.lineSearchOnQTau(self.fun, tau = self.tau, d = self.d[i].transpose(), alfa_zero=alfa_tilde[i], x_in=u, y_in=v)
-                    print("\t\t\t\t\t\t\t\t\t\t\t\t ALFA TEMP: " + str(alfa_temp))
+                    #print("\t\t\t\t\t\t\t\t\t\t\t\t ALFA TEMP: " + str(alfa_temp))
                     #print("passo: " + str(alfa_temp[i]))
                     #print(b)
                     
@@ -128,13 +128,11 @@ class DFPenaltyDecomposition:
                     if alfa_temp > epsilon: #se la alfa calcolata è maggiore del threshold epsilon allora aggiorna il punto da cui esploriamo, così che la prossima direzione che esploriamo inizia da li
                         u = u + alfa_temp*self.d[i].transpose()
                     #(altrimenti) u rimane invariato7
-                    print(u)
-                    print(v)
                     print("\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
                     #print(u)
                     #else:
                 #print("new u: " + str(u))
-                v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose()
+                v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose() #ERRORE ERA QUA, NON AVEVO MESSO IL TRANSPOSE!!! ATTENZIONEEEEEE
                 print("\t\t\t\t\t\t\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
             self.tau = self.gamma * self.tau 
             self.x.append(u)
@@ -142,7 +140,7 @@ class DFPenaltyDecomposition:
             k+=1
 
         print("[DF PD] FINISH: \n" + str(self.y[len(self.y)-1]))
-        print("VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1].transpose())))
+        print("VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
         print("valX_0: " + str(self.fun.getValueInX(self.y[0])))
     
     def getAlfaTildeMax(self, alfa_tilde):

@@ -83,7 +83,7 @@ def runOnServoDataset():
         [ 0.        ]])
 
     #dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([X[0]]).transpose(), gamma=1.1, max_iterations=3, l0_constraint=15, tau_zero=1)
-    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=3, l0_constraint=15, tau_zero=1)
+    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=8, l0_constraint=15, tau_zero=2)
     #dfpd = DFPenaltyDecomposition(fun, x_0 = x0, gamma=1.1, max_iterations=1, l0_constraint=15, tau_zero=1)
     dfpd.start()
 
