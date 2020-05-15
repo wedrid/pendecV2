@@ -60,7 +60,8 @@ class PenaltyDecomposition:
     def start(self):
         k = 0
         epsilon = 0.01
-        while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
+        #while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
+        while True : 
             u = copy.deepcopy(self.x[k])
 
             #min_xQtauk = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.matrix(np.ones(self.fun.number_of_x))).fun
@@ -72,8 +73,10 @@ class PenaltyDecomposition:
             else:
                 v = copy.deepcopy(self.y[0])
             first = None
-            
-            while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon: #TODO criterio per funzione che decresce di poco
+            qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
+            #while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon: #TODO criterio per funzione che decresce di poco
+            print("\t\t\t\t\t\t\t TAU VALUE: " + str(self.tau))
+            while True:
                 #primo blocco
                 
                 u = self.fun.getQTauOttimoGivenY(self.tau, v, np.matrix(np.ones(self.fun.number_of_x)))
@@ -88,20 +91,26 @@ class PenaltyDecomposition:
                 #print("v -┐\n" + str(v))
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
+                if qTauValPrev - self.fun.getQTauValue(self.tau, u, v) < 1e-5:
+                    break
+                else:
+                    qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
 
-            self.tau = 1.000001 * self.tau 
+            self.tau = self.gamma * self.tau 
             #self.tau = self.alfa * self.tau
             self.x.append(u)
             self.y.append(v)
             #epsilon *= 0.5
 
-            print("\t\t\t\t\t\t\t TAU VALUE: " + str(self.tau))
+            
 
-
+            if np.linalg.norm(self.x[k] - self.y[k]) < 1e-7:
+                break
             k+=1
+            
 
         print("FINISH: \n" + str(self.y[len(self.y)-1]))
         print("VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
-        print(self.y)
+        #print(self.y)
 
 
