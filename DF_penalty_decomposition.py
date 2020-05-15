@@ -128,12 +128,14 @@ class DFPenaltyDecomposition:
                     if alfa_temp > epsilon: #se la alfa calcolata è maggiore del threshold epsilon allora aggiorna il punto da cui esploriamo, così che la prossima direzione che esploriamo inizia da li
                         u = u + alfa_temp*self.d[i].transpose()
                     #(altrimenti) u rimane invariato7
-                    print("\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v.transpose())))
+                    print(u)
+                    print(v)
+                    print("\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
                     #print(u)
                     #else:
                 #print("new u: " + str(u))
-                v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
-                print("\t\t\t\t\t\t\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v.transpose())))
+                v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose()
+                print("\t\t\t\t\t\t\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
             self.tau = self.gamma * self.tau 
             self.x.append(u)
             self.y.append(v)
