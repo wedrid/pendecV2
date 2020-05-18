@@ -13,7 +13,7 @@ class DFPenaltyDecomposition:
         self.epsilon_succession = []
         self.number_of_variables = fun.number_of_x
 
-        self.delta = 0.99
+        self.delta = 0.6
 
         if l0_constraint is None:
             self.l0_constraint = len(fun.number_of_x) # in pratica corrisponde al non mettere il vincolo..
@@ -73,7 +73,9 @@ class DFPenaltyDecomposition:
         #the following is one iteration of the outer loop (for k=0,1,..)
         k = 0
         epsilon = 0.01
+        min = 100000000000
         while k < self.max_iterations: 
+        #while True:
             l = 0
             alfa_tilde = np.ones(self.number_of_variables*2)
             alfa_tilde[0] = 1
@@ -102,6 +104,7 @@ class DFPenaltyDecomposition:
             
             
             while self.getAlfaTildeMax(alfa_tilde) > epsilon: 
+            #qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
             #while True:
                 #print(alfa_tilde)
 
@@ -128,20 +131,29 @@ class DFPenaltyDecomposition:
                     if alfa_temp > epsilon: #se la alfa calcolata è maggiore del threshold epsilon allora aggiorna il punto da cui esploriamo, così che la prossima direzione che esploriamo inizia da li
                         u = u + alfa_temp*self.d[i].transpose()
                     #(altrimenti) u rimane invariato7
-                    print("\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
+                    #print("\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
                     #print(u)
                     #else:
                 #print("new u: " + str(u))
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose() #ERRORE ERA QUA, NON AVEVO MESSO IL TRANSPOSE!!! ATTENZIONEEEEEE
-                print("\t\t\t\t\t\t\t\t\t\t\t\t\t" + str(self.fun.getValueInX(v)))
+                print("\t\t\t\t\t\t\t\t\t\tV: " + str(self.fun.getValueInX(v)))
+                if self.fun.getValueInX(v) < min:
+                    min = self.fun.getValueInX(v)
+                
+
             self.tau = self.gamma * self.tau 
             self.x.append(u)
             self.y.append(v)
+
+            if np.linalg.norm(self.x[k] - self.y[k]) < 1e-10 and False:
+                break
+
             k+=1
 
         print("[DF PD] FINISH: \n" + str(self.y[len(self.y)-1]))
-        print("VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+        print("[DF PD] VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
         print("valX_0: " + str(self.fun.getValueInX(self.y[0])))
+        print("min " + str(min))
     
     def getAlfaTildeMax(self, alfa_tilde):
         return np.amax(alfa_tilde)

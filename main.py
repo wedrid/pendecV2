@@ -39,12 +39,36 @@ def main():
         print("Alfa = " +  str(alfa))
         print(type(alfa))
 
-    runOnServoDataset()
+    #runOnServoDataset()
+    #runOnHousing()
+
+    #runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
+    runOnBreastCancer()
+
+
     #runOnSmallLinearRegression()
+    
     
 
     #print(fun.getQTauOttimoGivenY(3, np.array([[1],[2],[3]]), np.matrix([1,2,3])))
     
+def runOnForestFires():
+    data = Dataset(name="forest-fires", directory="./datasets/")
+    X, Y = data.get_dataset()
+    Y = np.array([Y])
+    Y = Y.transpose()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
+    fun = RegressioneLineare(X, Y)
+    pendec = PenaltyDecomposition(fun, x_0= np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5, l0_constraint=15, tau_zero=1)
+    pendec.start()
+
+    inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=2, l0_constraint=15, tau_zero=1)
+    inexact.start()
+
+    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=1, l0_constraint=15, tau_zero=1)
+    dfpd.start()
+
 
 def runOnServoDataset():
     data = Dataset(name="servo", directory="./datasets/")
@@ -56,10 +80,10 @@ def runOnServoDataset():
 
     fun = RegressioneLineare(X, Y)
     pendec = PenaltyDecomposition(fun, x_0= np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5, l0_constraint=15, tau_zero=1)
-    #pendec.start()
+    pendec.start()
 
     inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=2, l0_constraint=15, tau_zero=1)
-    #inexact.start()
+    inexact.start()
 
     #dfpd = DFPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1, max_iterations=1, l0_constraint=15, tau_zero=2)
     x0 = np.array([[ 0.30989428],
@@ -83,7 +107,7 @@ def runOnServoDataset():
         [ 0.        ]])
 
     #dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([X[0]]).transpose(), gamma=1.1, max_iterations=3, l0_constraint=15, tau_zero=1)
-    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=8, l0_constraint=15, tau_zero=2)
+    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=3, l0_constraint=15, tau_zero=1)
     #dfpd = DFPenaltyDecomposition(fun, x_0 = x0, gamma=1.1, max_iterations=1, l0_constraint=15, tau_zero=1)
     dfpd.start()
 
@@ -102,8 +126,68 @@ def runOnSmallLinearRegression():
     dfpd.start()
 
 
+def runOnAutomobile():
+    data = Dataset(name="automobile", directory="./datasets/")
+    X, Y = data.get_dataset()
+    Y = np.array([Y])
+    Y = Y.transpose()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
 
+    
+    fun = RegressioneLineare(X, Y)
+    pendec = PenaltyDecomposition(fun, x_0= np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5, l0_constraint=15, tau_zero=1)
+    pendec.start()
 
+    inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=2, l0_constraint=15, tau_zero=1)
+    #inexact.start()
+
+    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=2, l0_constraint=15, tau_zero=1)
+    dfpd.start()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
+
+def runOnHousing():
+    data = Dataset(name="housing", directory="./datasets/")
+    X, Y = data.get_dataset()
+    Y = np.array([Y])
+    Y = Y.transpose()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
+
+    
+    fun = RegressioneLineare(X, Y)
+    pendec = PenaltyDecomposition(fun, x_0= np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5, l0_constraint=15, tau_zero=1)
+    pendec.start()
+
+    inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=2, l0_constraint=15, tau_zero=1)
+    inexact.start()
+
+    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=2, l0_constraint=15, tau_zero=1)
+    dfpd.start()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
+
+def runOnBreastCancer():
+    data = Dataset(name="breast-cancer", directory="./datasets/")
+    X, Y = data.get_dataset()
+    Y = np.array([Y])
+    Y = Y.transpose()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
+
+    
+    fun = RegressioneLineare(X, Y)
+    pendec = PenaltyDecomposition(fun, x_0= np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5, l0_constraint=15, tau_zero=1)
+    pendec.start()
+
+    inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=2, l0_constraint=15, tau_zero=1)
+    inexact.start()
+
+    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.2, max_iterations=2, l0_constraint=15, tau_zero=1)
+    dfpd.start()
+    print("Shape X " + str(X.shape))
+    print("Shape Y " + str(Y.shape))
 
 if __name__ == "__main__": 
     main()

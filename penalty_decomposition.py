@@ -91,7 +91,7 @@ class PenaltyDecomposition:
                 #print("v -┐\n" + str(v))
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
-                if qTauValPrev - self.fun.getQTauValue(self.tau, u, v) < 1e-5:
+                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v)) < 1e-5:
                     break
                 else:
                     qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
@@ -110,7 +110,7 @@ class PenaltyDecomposition:
             
 
         print("FINISH: \n" + str(self.y[len(self.y)-1]))
-        print("VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+        print("[PD] VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
         #print(self.y)
 
 
