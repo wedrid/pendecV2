@@ -9,6 +9,7 @@ class PenaltyDecomposition:
 
 
     def __init__(self, fun, tau_zero = None, x_0 = None, epsilon_succession = None, gamma = None, max_iterations = None, l0_constraint = None, alfa = None):
+        self.resultVal = None
         self.fun = fun
         self.x = []
         self.y = []
@@ -58,24 +59,42 @@ class PenaltyDecomposition:
         
 
     def start(self):
+        min = 100000000000
+
+
         k = 0
         epsilon = 0.01
-        #while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
-        while True : 
+        while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
+        #while True: 
+            print("ITERATION: " + str(k))
             u = copy.deepcopy(self.x[k])
 
-            #min_xQtauk = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.matrix(np.ones(self.fun.number_of_x))).fun
             argmin_xQtau = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.array(np.ones(self.fun.number_of_x))) #nota: nel caso della regressione lineare il terzo parametro è inutilizzato
-            print("ARGMIN: "+ str(argmin_xQtau))
+            #print("ARGMIN: "+ str(argmin_xQtau))
             min_xQtauk = self.fun.getQTauValue(self.tau, argmin_xQtau, self.y[k])
-            if min_xQtauk <= self.gamma:
+            
+            
+            
+            #questo è quanto è scritto sul paper, chiarini ha fatto una cosa diversa, la metto sotto
+            #if min_xQtauk <=self.gamma:
+            #    v = copy.deepcopy(self.y[k])
+            #else:
+            #    v = copy.deepcopy(self.y[0])
+            
+            
+            
+            if min_xQtauk < self.fun.getValueInX(self.x[0]):
+                #u = copy.deepcopy(self.x[k])
                 v = copy.deepcopy(self.y[k])
             else:
+                u = copy.deepcopy(self.x[0])
                 v = copy.deepcopy(self.y[0])
-            first = None
+            
+            
+            
             qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
-            #while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon: #TODO criterio per funzione che decresce di poco
-            print("\t\t\t\t\t\t\t TAU VALUE: " + str(self.tau))
+            #while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon: #TODO criterio per funzione che decresce di poco 
+            #print("\t\t\t\t\t\t\t TAU VALUE: " + str(self.tau))
             while True:
                 #primo blocco
                 
@@ -88,10 +107,24 @@ class PenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
 
+                print("------------- Iteration: " + str(k))
+                #print("u:\n " + str(u))
+                #print("v:\n " + str(v))
+                print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
+                print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
+                print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
+                print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
+
+                if self.fun.getValueInX(v) < min:
+                    min = self.fun.getValueInX(v)
+
+
+
                 #print("v -┐\n" + str(v))
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
-                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v)) < 1e-5:
+
+                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v)) < 0.001:
                     break
                 else:
                     qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
@@ -103,14 +136,17 @@ class PenaltyDecomposition:
             #epsilon *= 0.5
 
             
-
-            if np.linalg.norm(self.x[k] - self.y[k]) < 1e-7:
-                break
             k+=1
+            if np.linalg.norm(self.x[k] - self.y[k]) < 0.01 and True:
+                break
             
-
-        print("FINISH: \n" + str(self.y[len(self.y)-1]))
-        print("[PD] VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+            
+        
+        print("[PD] FINISH: \n" + str(self.y[len(self.y)-1]))
+        print("MIN --> " + str(min))
+        print("[PD] VAL (last): " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+        for point in self.y:
+            print("[PD] VAL (all): " + str(self.fun.getValueInX(point)))
         #print(self.y)
 
-
+        self.resultVal = self.fun.getValueInX(self.y[len(self.y)-1])

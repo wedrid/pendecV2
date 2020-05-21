@@ -1,7 +1,7 @@
 import numpy as np
 
 class DFLineSearch:
-    gamma = 0.99
+    gamma =  0.000001
     sigma = 1.1
 
     

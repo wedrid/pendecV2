@@ -111,6 +111,7 @@ class RegressioneLineare(Funzione):
 
         At=np.transpose(self.A)
         first=np.dot(At,self.A)+np.identity(n)*tau
+        first = np.matrix(first, dtype='float')
         first= np.linalg.inv(first)
         second=np.dot(At,self.b)+tau*y
         x_star=np.dot(first,second)

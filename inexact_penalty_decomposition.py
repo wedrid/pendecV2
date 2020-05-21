@@ -11,6 +11,7 @@ class InexactPenaltyDecomposition:
 
 
     def __init__(self, fun, tau_zero = None, x_0 = None, epsilon_succession = None, gamma = None, max_iterations = None, l0_constraint = None):
+        self.resultVal = None
         self.fun = fun
         self.x = []
         self.y = []
@@ -59,8 +60,11 @@ class InexactPenaltyDecomposition:
     def start(self):
         k = 0
         epsilon = 0.01
-        #while k < self.max_iterations:
-        while True:
+
+        min = 100000000000
+
+        while k < self.max_iterations:
+        #while True:
             x_temp = copy.deepcopy(self.x[k])
             y_temp = copy.deepcopy(self.y[k])
             alfa = Armijo.armijoOnQTau(self.fun, tau = self.tau, x_in=x_temp, y_in=y_temp)
@@ -77,7 +81,7 @@ class InexactPenaltyDecomposition:
             
             #while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon:
             qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
-            print("\t\t\t\t\t\t\t TAU VALUE: " + str(self.tau)) 
+            
 
             while True: 
                 #primo blocco
@@ -93,10 +97,23 @@ class InexactPenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
 
+                print("------------- Iteration: " + str(k))
+                #print("u:\n " + str(u))
+                #print("v:\n " + str(v))
+                print("\t\t\t\t\t\t\t TAU VALUE: " + str(self.tau)) 
+                print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
+                print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
+                print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
+                print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
+                print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+
+                if self.fun.getValueInX(v) < min:
+                    min = self.fun.getValueInX(v)
+
                 #per capire se sto andando in salita o in discesa
                 #print(self.fun.getQTauValue(self.tau, u, v))
 
-                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v) )< 1e-5:
+                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v) )< 0.001:
                     break
                 else:
                     qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
@@ -111,15 +128,23 @@ class InexactPenaltyDecomposition:
             self.x.append(u)
             self.y.append(v)
             #epsilon *= 0.5
-
-            if np.linalg.norm(self.x[k] - self.y[k]) < 1e-7:
-                break
+            
             k+=1
+            if np.linalg.norm(self.x[k] - self.y[k]) < 0.01 and True:
+                print("Breaking at: " + str(np.linalg.norm(self.x[k] - self.y[k])))
+                break
+            
 
         print("[INEXACT] FINISH: \n" + str(self.y[len(self.y)-1]))
+        print("MIN --> " + str(min))
+
         print("[INEXACT] VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
         #temp = np.array([[0.05653660635842047, 0.0, -0.2031083583060361, -0.9447476503130903, -0.4078710391440083, 0.0, -0.3890436268275701, -0.638997302470053, -0.7270358330345421, -0.7231540783565926, 1.863556377303855, 0.0, -0.6871298643343594, -0.5590708789547428, 0.0, 0.21798514077189976, 0.43644045042577034, 0.8046240510269675, 0.6743726512283135]]).transpose()
         #print("VAL misto interi " + str(self.fun.getValueInX(temp)))
         #print(self.y)
+        for point in self.y:
+            print("[INEXACT PD] VAL (all): " + str(self.fun.getValueInX(point)))
+        #print(self.y)
+        self.resultVal = self.fun.getValueInX(self.y[len(self.y)-1])
 
 
