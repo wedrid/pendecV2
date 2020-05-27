@@ -8,7 +8,7 @@ class Armijo:
 
     delta_k = 1 #chiaro ha usato delta_k = 1 a prescindere
     #gamma = 0.5
-    gamma = 0.000001 #per vedere se funziona come dovrebbe (confronto con chiaro)
+    gamma = 0.00001 #per vedere se funziona come dovrebbe (confronto con chiaro) (prima era 1e-6)
     delta = 0.5
     alfa = 1
 

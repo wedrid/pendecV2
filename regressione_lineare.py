@@ -53,7 +53,12 @@ class RegressioneLineare(Funzione):
         fGradient = self.getValueOfGradientInX(x)
 
         #il gradiente della "penalizzazione" è grad(||x-y||^2) = 2(x-y) (valore assoluto non c'è più quindi? TODO )
-        penalGradient = tau * (x-y) #qui c'è solo tau perchè (tau/2) * 2
+        try:
+            penalGradient = tau * (x-y) #qui c'è solo tau perchè (tau/2) * 2
+        except:
+            print("ERRORE")
+            print("x --> " + str(x))
+            print("y --> " + str(y))
         qTauXGradient = (fGradient + penalGradient)
         #print("Gradiente:\n " + str(qTauXGradient))
         return qTauXGradient

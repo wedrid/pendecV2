@@ -13,8 +13,9 @@ class DFPenaltyDecomposition:
         self.y = []
         self.epsilon_succession = []
         self.number_of_variables = fun.number_of_x
+        self.outerLoopCondition = 1e-4
 
-        self.delta = 0.7
+        self.delta = 0.5
 
         if l0_constraint is None:
             self.l0_constraint = len(fun.number_of_x) # in pratica corrisponde al non mettere il vincolo..
@@ -73,13 +74,14 @@ class DFPenaltyDecomposition:
     def start(self):
         #the following is one iteration of the outer loop (for k=0,1,..)
         k = 0
-        epsilon = 0.01
+        epsilon = 0.01 #TODO provare 10^-4
         min = 100000000000
-        while k < self.max_iterations: 
+        #while k < self.max_iterations: 
+        while True:
             l = 0
             alfa_tilde = np.ones(self.number_of_variables*2)
             alfa_tilde[0] = 1
-            print(alfa_tilde)
+            #print(alfa_tilde)
 
             x_trial = copy.deepcopy(self.x[k])   
             #print(x_trial)         
@@ -92,9 +94,9 @@ class DFPenaltyDecomposition:
                     x_trial = self.x[k] + alfa_hat * self.d[j].transpose()
                     break
             
-            print(x_trial)
+            #print(x_trial)
             if self.fun.getQTauValue(self.tau, x_trial, self.y[k]) <= self.fun.getValueInX(x_trial):
-                u = self.x[k] # TODO non x_trial?
+                u = self.x[k] 
                 #u = x_trial
                 v = self.y[k]
 
@@ -135,50 +137,57 @@ class DFPenaltyDecomposition:
                 #print("new u: " + str(u))
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose() #ERRORE ERA QUA, NON AVEVO MESSO IL TRANSPOSE!!! ATTENZIONEEEEEE
                 
+                if False:
                 
-                print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
-                #print("u:\n " + str(u))
-                #print("v:\n " + str(v))
-                print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
-                print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
-                print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
-                print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
-                print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
-                #print(alfa_tilde)
+                    print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
+                    #print("u:\n " + str(u))
+                    #print("v:\n " + str(v))
+                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
+                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
+                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
+                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
+                    print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+                    #print(alfa_tilde)
                 iteration+=1
                 if self.fun.getValueInX(v) < min:
                     min = self.fun.getValueInX(v)
+                    minPoint = v
                 if self.fun.getValueInX(v) > min and False:
                     print("!! RISALITA")
                     break
                 
 
             self.tau = self.gamma * self.tau 
-            print("Ultimo u: " + str(u))
-            print("Ultimo v: " + str(v))
+            #print("Ultimo u: " + str(u))
+            #print("Ultimo v: " + str(v))
             self.x.append(u)
             self.y.append(v)
 
             k+=1
             
-            if np.linalg.norm(self.x[k] - self.y[k]) < 0.1 and True:
-                print("Ultimo x: \n" + str(self.x[k]))
-                print("Ultimo y: \n" + str(self.y[k]))
+            if np.linalg.norm(self.x[k] - self.y[k]) < self.outerLoopCondition and True: #TODO 1e-3 #attenzione, 1e-3 inizia a risalire drasticamente
+                #print("Ultimo x: \n" + str(self.x[k]))
+                #print("Ultimo y: \n" + str(self.y[k]))
                 
                 break
             
-            print("K = " + str(k))
+             #print("K = " + str(k))
             
+        if False:
+            print("[DF PD] FINISH: \n" + str(self.y[len(self.y)-1]))
+            print("[DF PD] VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+            print("valX_0: " + str(self.fun.getValueInX(self.y[0])))
+            print("min " + str(min))
         
-        print("[DF PD] FINISH: \n" + str(self.y[len(self.y)-1]))
-        print("[DF PD] VAL: " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
-        print("valX_0: " + str(self.fun.getValueInX(self.y[0])))
-        print("min " + str(min))
+        #for point in self.y:
+            #print("[DF PD] VAL (all): " + str(self.fun.getValueInX(point)))
         
-        for point in self.y:
-            print("[DF PD] VAL (all): " + str(self.fun.getValueInX(point)))
         
         self.resultVal = self.fun.getValueInX(self.y[len(self.y)-1])
+        self.resultPoint = self.y[len(self.y)-1]
+
+        self.minPoint = minPoint
+        self.minVal = min
 
 
     def getAlfaTildeMax(self, alfa_tilde):

@@ -1,8 +1,8 @@
 import numpy as np
 
 class DFLineSearch:
-    gamma =  0.000001
-    sigma = 1.1
+    gamma =  0.00001
+    sigma = 2 #orig 1.1
 
     
     #NOTA line search sembra funzionare correttamente (verificato tramite funz. semplice x**2+y**2)

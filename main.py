@@ -6,10 +6,20 @@ from inexact_penalty_decomposition import *
 from DF_line_search import * 
 from Dataset import * 
 from DF_penalty_decomposition import * 
+import math
+from misto_interi import * 
+from datetime import datetime
+import json
+import time
+
+divisore_constraint = 4
+results = {}
+currentFileName = ""
+
 
 def main():
 
-    fun = RegressioneLineare(np.array([[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]), np.array([[1],[2],[3],[4],[5]]))
+    #fun = RegressioneLineare(np.array([[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]), np.array([[1],[2],[3],[4],[5]]))
 
     #DFLineSearch.provaLineSearch(None, alfa_zero = 1)
     #dfpd = DFPenaltyDecomposition(fun, x_0=np.array([[1],[2],[3]]), gamma=1.1, max_iterations=20, l0_constraint=2, tau_zero=2)
@@ -21,28 +31,69 @@ def main():
     #print(fun.getQTauXGradientNorm(5, np.array([[1],[2],[3]]), np.array([[1],[2],[3]])))
     #print(fun.getQTauXGradient(5, np.array([[1],[2],[3]]), np.array([[1],[2],[3]])))
     #print(fun.getFeasibleYQTauArgminGivenX(5, np.array([[1],[2],[3]]), 2))
+    #runOnCrime()
+    if True:
+        date = datetime.now()
+        global currentFileName 
+        currentFileName = "results_div_4-" + date.isoformat() + ".json"
+        print("--------------------> filename: " + currentFileName)
+        with open(currentFileName, 'w') as outfile:
+            json.dump(results, outfile, indent=4)
 
-    #runOnServoDataset()
-    #runOnHousing()
+        runOnServoDataset()
+        runOnHousing()
+        runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
+        runOnBreastCancer()
+        runOnAutoMPG()
+        runOnAutomobile()
+        #runOnCrime() rompe tutto :(
 
-    #runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
-    runOnBreastCancer()
+        currentFileName = "results_div_2-" + date.isoformat() + ".json"
+        with open(currentFileName, 'w') as outfile:
+            json.dump(results, outfile, indent=4)
+        
+        global divisore_constraint
+        divisore_constraint = 2
+        runOnServoDataset()
+        runOnHousing()
+        runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
+        runOnBreastCancer()
+        
+        
+        runOnAutoMPG()
+        runOnAutomobile()
+        #runOnCrime()
 
 
-    #runOnSmallLinearRegression()
     
     
 
     #print(fun.getQTauOttimoGivenY(3, np.array([[1],[2],[3]]), np.matrix([1,2,3])))
-    
+
+def runOnSolarFlares(): #doesn't work
+    data = Dataset(name = "solar-flare", directory="./datasets/")
+    run(data, 'solar-flare')
+
+
+def runOnAutoMPG():
+    data = Dataset(name = "auto-mpg", directory="./datasets/")
+    run(data, 'auto-mpg')
+
+def runOnAutomobile():
+    data = Dataset(name="automobile", directory="./datasets/")
+    run(data, 'automobile')
+
 def runOnForestFires():
     data = Dataset(name="forest-fires", directory="./datasets/")
-    run(data)
+    run(data, 'forest-fires')
 
 
 def runOnServoDataset():
     data = Dataset(name="servo", directory="./datasets/")
-    run(data)
+    run(data, 'servo')
+    
+    
+    
     if(False):
         X, Y = data.get_dataset()
         Y = np.array([Y])
@@ -57,30 +108,12 @@ def runOnServoDataset():
         inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5, l0_constraint=15, tau_zero=1)
         inexact.start()
 
-        #dfpd = DFPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1, max_iterations=1, l0_constraint=15, tau_zero=2)
-        x0 = np.array([[ 0.30989428],
-            [ 0.25898083],
-            [ 0.        ],
-            [-0.69131161],
-            [-0.15418535],
-            [ 0.44026589],
-            [ 0.        ],
-            [-0.20055506],
-            [-0.28838699],
-            [-0.2844907 ],
-            [ 1.64855397],
-            [-0.21032222],
-            [-0.9012133 ],
-            [-0.72221473],
-            [-0.47445776],
-            [-0.26085684],
-            [ 0.        ],
-            [ 0.32707444],
-            [ 0.        ]])
+        dfpd = DFPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1, max_iterations=1, l0_constraint=15, tau_zero=2)
 
-        #dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([X[0]]).transpose(), gamma=1.1, max_iterations=3, l0_constraint=15, tau_zero=1)
+
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([X[0]]).transpose(), gamma=1.1, max_iterations=3, l0_constraint=15, tau_zero=1)
         dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=3, l0_constraint=15, tau_zero=1)
-        #dfpd = DFPenaltyDecomposition(fun, x_0 = x0, gamma=1.1, max_iterations=1, l0_constraint=15, tau_zero=1)
+        dfpd = DFPenaltyDecomposition(fun, x_0 = x0, gamma=1.1, max_iterations=1, l0_constraint=15, tau_zero=1)
         dfpd.start()
 
 
@@ -97,46 +130,168 @@ def runOnSmallLinearRegression():
     dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([[1],[2],[3]]), gamma=1.1, max_iterations=3, l0_constraint=2, tau_zero=2)
     dfpd.start()
 
-
-def runOnAutomobile():
-    data = Dataset(name="automobile", directory="./datasets/")
-    run(data)
+def runOnCrime():
+    data = Dataset(name="crime", directory="./datasets/")
+    run(data, 'crime')
 
 def runOnHousing():
     data = Dataset(name="housing", directory="./datasets/")
-    run(data)
+    run(data, 'housing')
 
 def runOnBreastCancer():
     data = Dataset(name="breast-cancer", directory="./datasets/")
-    run(data)
+    run(data, 'breast-cancer')
 
-def run(data):
+def run(data, name):
+    #runTests(data)
 
+    if True: #uncomment to save results to json    
+        print("FILENAME " + currentFileName)
+        X, Y = data.get_dataset()
+        Y = np.array([Y])
+        Y = Y.transpose()
+        print("Shape X " + str(X.shape))
+        print("Shape Y " + str(Y.shape)) 
+        res_temp = {'name': name, 'shape-x': X.shape, 'shape-y': Y.shape}
+
+        
+        fun = RegressioneLineare(X, Y)
+        constraint1 = math.floor(fun.number_of_x / divisore_constraint)
+        #TODO iniziare da zero
+        pendec = PenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        print("[Penalty decomposition on " + name + "] starting at " + time.asctime())
+        start = time.time()
+        pendec.start()
+        end = time.time()
+        elapsed = end-start
+        #if False:
+        res = list(np.array(pendec.resultPoint.transpose())[0] )
+        print("------> " + str(res))
+        minp = list(  np.array(pendec.minPoint.transpose())[0] )
+        print(minp)
+        print(pendec.minVal[0,0])
+        print(pendec.resultVal[0,0])
+
+
+        res_temp['pd'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': pendec.resultVal[0,0], 'min-val': pendec.minVal[0,0],
+            'constraint': constraint1
+        }
+
+
+
+        inexact = InexactPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        print("[Inexact penalty decomposition on " + name + "] starting at " + time.asctime())
+        start = time.time()
+        inexact.start()
+        end = time.time()
+        elapsed = end-start
+
+        res = list(np.array(inexact.resultPoint.transpose())[0] )
+        print("------> " + str(res))
+        minp = list(  np.array(inexact.minPoint.transpose())[0] )
+        print(minp)
+        print(inexact.minVal[0,0])
+        print(inexact.resultVal[0,0])
+
+        
+        res_temp['inexact-pd'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': inexact.resultVal[0,0], 'min-val': inexact.minVal[0,0],
+            'constraint': constraint1
+        }
+
+        
+
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        print("[DP penalty decomposition on " + name + "] starting at " + time.asctime())
+        start = time.time()
+        dfpd.start()
+        end = time.time()
+        elapsed = end-start
+
+        res = list(np.array(dfpd.resultPoint.transpose())[0] )
+        print("------> " + str(res))
+        minp = list(  np.array(dfpd.minPoint.transpose())[0] )
+        print(minp)
+        print(dfpd.minVal)
+        print(dfpd.resultVal)
+
+        res_temp['dfpd'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,
+            'constraint': constraint1
+        }
+
+
+
+
+
+        X, Y = data.get_dataset()
+
+        #print(X)
+        #print(Y)
+        print("[Misto interi on " + name + "] starting at " + time.asctime())
+        start = time.time()
+        ms = MistoInteri(X, Y, constraint1)
+        end = time.time()
+        elapsed = end-start
+
+
+        print(np.array(ms.result[0]))
+        print(ms.result[1])
+
+        res_temp['misto-interi'] = {'elapsed-time': elapsed, 'return-point': ms.result[0], 'return-val': ms.result[1]/2,  'constraint': constraint1}
+
+        #print(results)
+
+
+        
+        #resJson = json.dumps(results)
+        #print(resJson)
+        results[name] = res_temp
+        temp = {}
+        with open(currentFileName) as infile:
+            temp = json.load(infile)
+
+        temp[name] = res_temp
+
+        with open(currentFileName, 'w') as outfile:
+            json.dump(temp, outfile, indent=4)
+
+    
+def runTests(data):
     X, Y = data.get_dataset()
     Y = np.array([Y])
     Y = Y.transpose()
-    print("Shape X " + str(X.shape))
-    print("Shape Y " + str(Y.shape))
 
-    
     fun = RegressioneLineare(X, Y)
-    pendec = PenaltyDecomposition(fun, x_0= np.array([X[0]]).transpose(), gamma=1.1, max_iterations=500000000, l0_constraint=15, tau_zero=1)
-    pendec.start()
+    constraint1 = math.floor(fun.number_of_x / divisore_constraint)
 
-    inexact = InexactPenaltyDecomposition(fun, x_0=np.array([X[0]]).transpose(), gamma=1.1, max_iterations=5000000000, l0_constraint=15, tau_zero=1)
-    inexact.start()
 
-    dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.ones(fun.number_of_x)]).transpose(), gamma=2, max_iterations=5000000000, l0_constraint=15, tau_zero=1)
-    dfpd.start()
-    print("Shape X " + str(X.shape))
-    print("Shape Y " + str(Y.shape))
+    #pendec = PenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+    print("[Penalty decomposition " + "] starting at " + time.asctime())
+    start = time.time()
+    #pendec.start()
+    end = time.time()
+    elapsed = end-start
 
-    print("PD --> " + str(pendec.resultVal))
-    print("INEXACT PD --> " + str(inexact.resultVal))
-    print("DF PD --> " + str(dfpd.resultVal))
+    if True:
+        inexact = InexactPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        print("[Inexact penalty decomposition on "  + "] starting at " + time.asctime())
+        start = time.time()
+        #inexact.start()
+        end = time.time()
+        elapsed = end-start
+
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        print("[DP penalty decomposition on " + "] starting at " + time.asctime())
+        start = time.time()
+        dfpd.start()
+        end = time.time()
+        elapsed = end-start
+
+    #print("PD: " + str(pendec.resultVal))
+    #print("Inexact PD: " + inexact.resultVal)
+    #print("DFPD: " + dfpd.resultVal)
+
 
 if __name__ == "__main__": 
     main()
 
 
-    #CHANGES: 

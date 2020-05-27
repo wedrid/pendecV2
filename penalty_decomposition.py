@@ -15,6 +15,10 @@ class PenaltyDecomposition:
         self.y = []
         self.epsilon_succession = []
         self.number_of_variables = fun.number_of_x
+        self.minPoint = None
+        self.minVal = None
+        self.outerLoopCondition = 1e-4
+        self.innerLoopCondition = 1e-5 
 
         if l0_constraint is None:
             self.l0_constraint = len(fun.number_of_x) # in pratica corrisponde al non mettere il vincolo..
@@ -40,7 +44,7 @@ class PenaltyDecomposition:
             return
         else:
             self.x.append(x_0)
-            print("[PENALTY DECOMPOSITION] x_0 is " + str(x_0))
+            #print("[PENALTY DECOMPOSITION] x_0 is " + str(x_0))
         self.y.append(copy.deepcopy(self.x[0]))
 
         if(epsilon_succession is None):
@@ -64,9 +68,9 @@ class PenaltyDecomposition:
 
         k = 0
         epsilon = 0.01
-        while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
-        #while True: 
-            print("ITERATION: " + str(k))
+        #while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
+        while True: 
+            #print("ITERATION: " + str(k))
             u = copy.deepcopy(self.x[k])
 
             argmin_xQtau = self.fun.getQTauOttimoGivenY(self.tau, self.y[k], np.array(np.ones(self.fun.number_of_x))) #nota: nel caso della regressione lineare il terzo parametro è inutilizzato
@@ -107,16 +111,18 @@ class PenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
 
-                print("------------- Iteration: " + str(k))
-                #print("u:\n " + str(u))
-                #print("v:\n " + str(v))
-                print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
-                print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
-                print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
-                print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
+                if False:
+                    print("------------- Iteration: " + str(k) + " TAU: "+  str(self.tau))
+                    #print("u:\n " + str(u))
+                    #print("v:\n " + str(v))
+                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
+                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
+                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
+                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
 
                 if self.fun.getValueInX(v) < min:
                     min = self.fun.getValueInX(v)
+                    minPoint = v
 
 
 
@@ -124,7 +130,7 @@ class PenaltyDecomposition:
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
 
-                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v)) < 0.001:
+                if abs(qTauValPrev - self.fun.getQTauValue(self.tau, u, v)) < self.innerLoopCondition:
                     break
                 else:
                     qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
@@ -137,16 +143,21 @@ class PenaltyDecomposition:
 
             
             k+=1
-            if np.linalg.norm(self.x[k] - self.y[k]) < 0.01 and True:
+            if np.linalg.norm(self.x[k] - self.y[k]) < self.outerLoopCondition and True:
                 break
             
             
-        
-        print("[PD] FINISH: \n" + str(self.y[len(self.y)-1]))
-        print("MIN --> " + str(min))
-        print("[PD] VAL (last): " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
-        for point in self.y:
-            print("[PD] VAL (all): " + str(self.fun.getValueInX(point)))
-        #print(self.y)
+        if False:
+            print("[PD] FINISH: \n" + str(self.y[len(self.y)-1]))
+            print("MIN --> " + str(min))
+            print("[PD] VAL (last): " + str(self.fun.getValueInX(self.y[len(self.y)-1])))
+            for point in self.y:
+                print("[PD] VAL (all): " + str(self.fun.getValueInX(point)))
+            #print(self.y)
 
         self.resultVal = self.fun.getValueInX(self.y[len(self.y)-1])
+        self.resultPoint = self.y[len(self.y)-1]
+
+        self.minPoint = minPoint
+        self.minVal = min
+
