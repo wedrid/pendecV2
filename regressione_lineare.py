@@ -9,7 +9,7 @@ class RegressioneLineare(Funzione):
         if len(A.shape) > 2:
             print("A non può avere più di due dimensioni")
             return
-        
+            
         if b.shape[1] > 1: 
             print("Problema malposto")
             return

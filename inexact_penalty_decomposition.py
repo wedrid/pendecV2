@@ -4,13 +4,16 @@ import copy
 from regressione_lineare import * 
 from armijo import * 
 from DF_line_search import * 
+import csv
+from datetime import datetime
 
 class InexactPenaltyDecomposition: 
     #a sto giro non faccio i metodi statici che mi fanno solo casino
 
 
 
-    def __init__(self, fun, tau_zero = None, x_0 = None, epsilon_succession = None, gamma = None, max_iterations = None, l0_constraint = None):
+    def __init__(self, fun, tau_zero = None, x_0 = None, epsilon_succession = None, gamma = None, max_iterations = None, l0_constraint = None, name="Noname", save=False):
+        self.name = name
         self.resultVal = None
         self.fun = fun
         self.x = []
@@ -56,7 +59,20 @@ class InexactPenaltyDecomposition:
             print("Gamma is required")
         else: 
             self.gamma = gamma #TODO gamma deve rispettare il vincolo che dev'essere maggiore o uguale v. paper
-        
+
+        self.hack = False
+
+        self.saveIterationsToCSV = save #se si vogliono salvare le iterazioni su csv
+        if self.saveIterationsToCSV:
+            self.iterationSaver = np.empty((0, 7))
+            date = datetime.now()
+            div = "DIV" + str(math.floor(self.number_of_variables/l0_constraint))
+            self.currentFileName ="./convergence_data/22ago2020/" +  name + "-IPDiterations-" + str(self.l0_constraint) + "_of_" + str(self.number_of_variables) +"_dt_"+ date.replace(microsecond=0).isoformat() + div+ ".csv"
+            with open(self.currentFileName, mode="a") as csvFile:
+                fieldnames = ['k', 'tau', 'f(u)', 'f(v)', 'q(u,v)', '||x-y||', 'currentMin']
+                writer = csv.DictWriter(csvFile, fieldnames=fieldnames)
+                writer.writeheader()
+            csvFile.close()
         
 
     def start(self):
@@ -99,17 +115,28 @@ class InexactPenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
 
-                if False:
-                    print("Iteration: " + str(k))
-                    #print("u:\n " + str(u))
-                    #print("v:\n " + str(v))
-                    print("TAU VALUE: " + str(self.tau)) 
-                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
-                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
-                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
-                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
-                    print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
-
+                if True:
+                    if(self.hack):
+                        print("Iteration: " + str(k))
+                        #print("u:\n " + str(u))
+                        #print("v:\n " + str(v))
+                        fu = self.fun.getValueInX(u)[0,0]
+                        fv = self.fun.getValueInX(v)[0,0]
+                        quv = self.fun.getQTauValue(self.tau, u, v)[0,0]
+                        lessy = np.linalg.norm(self.x[k] - self.y[k])
+                        current_min = min[0,0]
+                        print("TAU VALUE: " + str(self.tau)) 
+                        print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                        print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
+                        print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                        print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(lessy))
+                        print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+                        temp = np.array([[k, self.tau, fu, fv, quv, lessy, current_min]])
+                        if self.saveIterationsToCSV:
+                            self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)
+                    else:
+                        self.hack = True
+                
                 if self.fun.getValueInX(v) < min:
                     min = self.fun.getValueInX(v)
                     minPoint = v
@@ -127,7 +154,19 @@ class InexactPenaltyDecomposition:
                 #print("\t\t\t\t\t\t\t\tNORMA --> " + str(self.fun.getQTauXGradientNorm(self.tau, u, v)))
                 #ATTENZIONE, in questa implementazione i vettori delle variabili sono VETTORI COLONNA 
 
+            if self.saveIterationsToCSV:
+                #1 apri file
+                with open(self.currentFileName, 'a') as file:
+                    writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    for row in self.iterationSaver:
+                        writer.writerow(row)
+                #2 reinizializza la matrice
+                self.iterationSaver = np.empty((0, 7))
+
+
             self.tau = self.gamma * self.tau 
+            if self.tau > 1.5e6:
+                break
             #self.tau = self.alfa * self.tau
             self.x.append(u)
             self.y.append(v)

@@ -2,13 +2,15 @@ from scipy.optimize import minimize
 import math
 import copy
 from regressione_lineare import * 
+import csv
+from datetime import datetime
+
 
 class PenaltyDecomposition: 
     #a sto giro non faccio i metodi statici che mi fanno solo casino
 
-
-
-    def __init__(self, fun, tau_zero = None, x_0 = None, epsilon_succession = None, gamma = None, max_iterations = None, l0_constraint = None, alfa = None):
+    def __init__(self, fun, tau_zero = None, x_0 = None, epsilon_succession = None, gamma = None, max_iterations = None, l0_constraint = None, alfa = None, name="Noname", save=False):
+        self.name = name
         self.resultVal = None
         self.fun = fun
         self.x = []
@@ -61,6 +63,17 @@ class PenaltyDecomposition:
         if(alfa is None):
             self.alfa = 1.2
         
+        self.saveIterationsToCSV = save #se si vogliono salvare le iterazioni su csv
+        if self.saveIterationsToCSV:
+            self.iterationSaver = np.empty((0, 6))
+            date = datetime.now()
+            div = "DIV" + str(math.floor(self.number_of_variables/l0_constraint))
+            self.currentFileName = "./convergence_data/22ago2020/" + name + "-PDiterations-" + str(self.l0_constraint) + "_of_" + str(self.number_of_variables) + "_dt_" + date.replace(microsecond=0).isoformat() + div + ".csv"
+            with open(self.currentFileName, mode="a") as csvFile:
+                fieldnames = ['k', 'tau', 'f(u)', 'f(v)', 'q(u,v)', '||x-y||']
+                writer = csv.DictWriter(csvFile, fieldnames=fieldnames)
+                writer.writeheader()
+            csvFile.close()
 
     def start(self):
         min = 100000000000
@@ -68,7 +81,7 @@ class PenaltyDecomposition:
 
         k = 0
         epsilon = 0.01
-        #while k < self.max_iterations: #TODO cambiare criterio di arresto, distanza |x-y|
+        #while k < self.max_iterations: #DONE cambiare criterio di arresto, distanza |x-y|
         while True: 
             #print("ITERATION: " + str(k))
             u = copy.deepcopy(self.x[k])
@@ -111,14 +124,22 @@ class PenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
 
-                if False:
+                if True:
                     print("------------- Iteration: " + str(k) + " TAU: "+  str(self.tau))
                     #print("u:\n " + str(u))
                     #print("v:\n " + str(v))
-                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(self.fun.getValueInX(u)))
-                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
-                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(self.fun.getQTauValue(self.tau, u, v)))
-                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(np.linalg.norm(self.x[k] - self.y[k])))
+                    fu = self.fun.getValueInX(u)[0,0]
+                    fv = self.fun.getValueInX(v)[0,0]
+                    quv = self.fun.getQTauValue(self.tau, u, v)[0,0]
+                    xlessy = np.linalg.norm(self.x[k] - self.y[k])
+                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
+                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
+                    if self.saveIterationsToCSV:
+                        temp = np.array([[k, self.tau, fu, fv, quv, xlessy]])
+                        self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)
+
 
                 if self.fun.getValueInX(v) < min:
                     min = self.fun.getValueInX(v)
@@ -134,6 +155,17 @@ class PenaltyDecomposition:
                     break
                 else:
                     qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
+
+
+            if self.saveIterationsToCSV:
+                #1 apri file
+                with open(self.currentFileName, 'a') as file:
+                    writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    for row in self.iterationSaver:
+                        writer.writerow(row)
+                #2 reinizializza la matrice
+                self.iterationSaver = np.empty((0, 6))
+                
 
             self.tau = self.gamma * self.tau 
             #self.tau = self.alfa * self.tau

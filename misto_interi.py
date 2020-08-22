@@ -15,7 +15,7 @@ class MistoInteri:
 
         self.__debug = False
         self.__gurobi_limit = False
-        self.__time_limit = 60*45 #variabile
+        self.__time_limit = 60*60 #variabile
         self.__n_cpus = 1
         self.result = self.__gurobi_optimization(constraint)
         #print("Result = " + str(self.result))  

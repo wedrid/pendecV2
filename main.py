@@ -11,6 +11,8 @@ from misto_interi import *
 from datetime import datetime
 import json
 import time
+from quadratic_test_problem import *
+from exponential_test_problem import *
 
 divisore_constraint = 4
 results = {}
@@ -18,7 +20,7 @@ currentFileName = ""
 
 
 def main():
-
+    #quadratic = QuadraticTestProblem()
     #fun = RegressioneLineare(np.array([[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]), np.array([[1],[2],[3],[4],[5]]))
 
     #DFLineSearch.provaLineSearch(None, alfa_zero = 1)
@@ -32,6 +34,7 @@ def main():
     #print(fun.getQTauXGradient(5, np.array([[1],[2],[3]]), np.array([[1],[2],[3]])))
     #print(fun.getFeasibleYQTauArgminGivenX(5, np.array([[1],[2],[3]]), 2))
     #runOnCrime()
+    #runOnServoDataset()
     if True:
         date = datetime.now()
         global currentFileName 
@@ -41,32 +44,29 @@ def main():
             json.dump(results, outfile, indent=4)
 
         runOnServoDataset()
-        runOnHousing()
-        runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
-        runOnBreastCancer()
-        runOnAutoMPG()
-        runOnAutomobile()
+        #runOnHousing()
+        #runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
+        #runOnBreastCancer()
+        #runOnAutoMPG()
+        #runOnAutomobile()
         #runOnCrime() rompe tutto :(
+        if False:
+            currentFileName = "results_div_2-" + date.isoformat() + ".json"
+            with open(currentFileName, 'w') as outfile:
+                json.dump(results, outfile, indent=4)
+            
+            global divisore_constraint
+            divisore_constraint = 2
+            runOnServoDataset()
+            runOnHousing()
+            runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
+            runOnBreastCancer()
+            
+            
+            runOnAutoMPG()
+            runOnAutomobile()
+            #runOnCrime()
 
-        currentFileName = "results_div_2-" + date.isoformat() + ".json"
-        with open(currentFileName, 'w') as outfile:
-            json.dump(results, outfile, indent=4)
-        
-        global divisore_constraint
-        divisore_constraint = 2
-        runOnServoDataset()
-        runOnHousing()
-        runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
-        runOnBreastCancer()
-        
-        
-        runOnAutoMPG()
-        runOnAutomobile()
-        #runOnCrime()
-
-
-    
-    
 
     #print(fun.getQTauOttimoGivenY(3, np.array([[1],[2],[3]]), np.matrix([1,2,3])))
 
@@ -132,7 +132,22 @@ def runOnSmallLinearRegression():
 
 def runOnCrime():
     data = Dataset(name="crime", directory="./datasets/")
-    run(data, 'crime')
+    #run(data, 'crime')
+    X, Y = data.get_dataset()
+    Y = np.array([Y])
+    Y = Y.transpose()
+    name = "Pippo"
+    salva = True
+    #il seguente è per mettere un tetto massimo a tau, perchè con crime si rompe tutto 
+    if False:
+        fun = RegressioneLineare(X, Y)
+        constraint1 = math.floor(fun.number_of_x / divisore_constraint)
+        pendec = PenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
+        pendec.start()
+        inexact = InexactPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
+        inexact.start()
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
+        #dfpd.start()
 
 def runOnHousing():
     data = Dataset(name="housing", directory="./datasets/")
@@ -144,8 +159,8 @@ def runOnBreastCancer():
 
 def run(data, name):
     #runTests(data)
-
-    if True: #uncomment to save results to json    
+    salva = False #per salvare i dati sulla convergenza
+    if True: #(uncomment to save results to json) --> no, è ridondante  
         print("FILENAME " + currentFileName)
         X, Y = data.get_dataset()
         Y = np.array([Y])
@@ -154,11 +169,10 @@ def run(data, name):
         print("Shape Y " + str(Y.shape)) 
         res_temp = {'name': name, 'shape-x': X.shape, 'shape-y': Y.shape}
 
-        
         fun = RegressioneLineare(X, Y)
         constraint1 = math.floor(fun.number_of_x / divisore_constraint)
         #TODO iniziare da zero
-        pendec = PenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        pendec = PenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
         print("[Penalty decomposition on " + name + "] starting at " + time.asctime())
         start = time.time()
         pendec.start()
@@ -179,7 +193,7 @@ def run(data, name):
 
 
 
-        inexact = InexactPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        inexact = InexactPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
         print("[Inexact penalty decomposition on " + name + "] starting at " + time.asctime())
         start = time.time()
         inexact.start()
@@ -200,7 +214,7 @@ def run(data, name):
 
         
 
-        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1)
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
         print("[DP penalty decomposition on " + name + "] starting at " + time.asctime())
         start = time.time()
         dfpd.start()
@@ -218,9 +232,41 @@ def run(data, name):
             'constraint': constraint1
         }
 
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
+        print("[DP penalty decomposition on " + name + "] starting at " + time.asctime())
+        start = time.time()
+        dfpd.startWithBRestart()
+        end = time.time()
+        elapsed = end-start
 
+        res = list(np.array(dfpd.resultPoint.transpose())[0] )
+        print("------> " + str(res))
+        minp = list(  np.array(dfpd.minPoint.transpose())[0] )
+        print(minp)
+        print("Min value, B restart: " + str(dfpd.minVal))
+        print("Res value " + str(dfpd.resultVal))
 
+        res_temp['dfpd_b_restart'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,
+            'constraint': constraint1
+        }
 
+        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
+        print("[DP penalty decomposition on " + name + "] starting at " + time.asctime())
+        start = time.time()
+        dfpd.startWithRandomizedStep()
+        end = time.time()
+        elapsed = end-start
+
+        res = list(np.array(dfpd.resultPoint.transpose())[0] )
+        print("------> " + str(res))
+        minp = list(  np.array(dfpd.minPoint.transpose())[0] )
+        print(minp)
+        print("Min value, B restart: " + str(dfpd.minVal))
+        print("Res value " + str(dfpd.resultVal))
+
+        res_temp['dfpd_randomized_step'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,
+            'constraint': constraint1
+        }
 
         X, Y = data.get_dataset()
 
@@ -244,15 +290,17 @@ def run(data, name):
         
         #resJson = json.dumps(results)
         #print(resJson)
-        results[name] = res_temp
-        temp = {}
-        with open(currentFileName) as infile:
-            temp = json.load(infile)
+        #Blocco successivo per salvare i risultati su file
+        if True:
+            results[name] = res_temp
+            temp = {}
+            with open(currentFileName) as infile:
+                temp = json.load(infile)
 
-        temp[name] = res_temp
+            temp[name] = res_temp
 
-        with open(currentFileName, 'w') as outfile:
-            json.dump(temp, outfile, indent=4)
+            with open(currentFileName, 'w') as outfile:
+                json.dump(temp, outfile, indent=4)
 
     
 def runTests(data):
