@@ -34,8 +34,9 @@ def main():
     #print(fun.getQTauXGradient(5, np.array([[1],[2],[3]]), np.array([[1],[2],[3]])))
     #print(fun.getFeasibleYQTauArgminGivenX(5, np.array([[1],[2],[3]]), 2))
     #runOnCrime()
-    #runOnServoDataset()
-    if True:
+    #runOnHousing()
+    #runOnSolarFlares()
+    if False:
         date = datetime.now()
         global currentFileName 
         currentFileName = "results_div_4-" + date.isoformat() + ".json"
@@ -44,13 +45,13 @@ def main():
             json.dump(results, outfile, indent=4)
 
         runOnServoDataset()
-        #runOnHousing()
-        #runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
-        #runOnBreastCancer()
-        #runOnAutoMPG()
-        #runOnAutomobile()
+        runOnHousing()
+        runOnForestFires() #inexact slower, DF only one iteration -> 275.89008406564056 (Exact --> 262)
+        runOnBreastCancer()
+        runOnAutoMPG()
+        runOnAutomobile()
         #runOnCrime() rompe tutto :(
-        if False:
+        if True:
             currentFileName = "results_div_2-" + date.isoformat() + ".json"
             with open(currentFileName, 'w') as outfile:
                 json.dump(results, outfile, indent=4)
@@ -137,7 +138,7 @@ def runOnCrime():
     Y = np.array([Y])
     Y = Y.transpose()
     name = "Pippo"
-    salva = True
+    salva = False
     #il seguente è per mettere un tetto massimo a tau, perchè con crime si rompe tutto 
     if False:
         fun = RegressioneLineare(X, Y)
@@ -165,7 +166,7 @@ def run(data, name):
         X, Y = data.get_dataset()
         Y = np.array([Y])
         Y = Y.transpose()
-        print("Shape X " + str(X.shape))
+        print("Shape X " + str(X.shape)) 
         print("Shape Y " + str(Y.shape)) 
         res_temp = {'name': name, 'shape-x': X.shape, 'shape-y': Y.shape}
 
@@ -231,27 +232,27 @@ def run(data, name):
         res_temp['dfpd'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,
             'constraint': constraint1
         }
+        if False:
+            dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
+            print("[DP penalty decomposition b restart on " + name + "] starting at " + time.asctime())
+            start = time.time()
+            dfpd.startWithBRestart()
+            end = time.time()
+            elapsed = end-start
+
+            res = list(np.array(dfpd.resultPoint.transpose())[0] )
+            print("------> " + str(res))
+            minp = list(  np.array(dfpd.minPoint.transpose())[0] )
+            print(minp)
+            print("Min value, B restart: " + str(dfpd.minVal))
+            print("Res value " + str(dfpd.resultVal))
+
+            res_temp['dfpd_b_restart'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,
+                'constraint': constraint1
+            }
 
         dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
-        print("[DP penalty decomposition on " + name + "] starting at " + time.asctime())
-        start = time.time()
-        dfpd.startWithBRestart()
-        end = time.time()
-        elapsed = end-start
-
-        res = list(np.array(dfpd.resultPoint.transpose())[0] )
-        print("------> " + str(res))
-        minp = list(  np.array(dfpd.minPoint.transpose())[0] )
-        print(minp)
-        print("Min value, B restart: " + str(dfpd.minVal))
-        print("Res value " + str(dfpd.resultVal))
-
-        res_temp['dfpd_b_restart'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,
-            'constraint': constraint1
-        }
-
-        dfpd = DFPenaltyDecomposition(fun, x_0 = np.array([np.zeros(fun.number_of_x)]).transpose(), gamma=1.1, max_iterations=500000000000000, l0_constraint=constraint1, tau_zero=1, name=name, save=salva)
-        print("[DP penalty decomposition on " + name + "] starting at " + time.asctime())
+        print("[DP penalty decomposition randomized step on " + name + "] starting at " + time.asctime())
         start = time.time()
         dfpd.startWithRandomizedStep()
         end = time.time()
@@ -261,7 +262,7 @@ def run(data, name):
         print("------> " + str(res))
         minp = list(  np.array(dfpd.minPoint.transpose())[0] )
         print(minp)
-        print("Min value, B restart: " + str(dfpd.minVal))
+        print("Min value, randomized: " + str(dfpd.minVal))
         print("Res value " + str(dfpd.resultVal))
 
         res_temp['dfpd_randomized_step'] = {'elapsed-time': elapsed, 'return-point': res, 'min-point': minp, 'return-val': dfpd.resultVal, 'min-val': dfpd.minVal,

@@ -125,17 +125,18 @@ class PenaltyDecomposition:
                 v = np.matrix(v).transpose()
 
                 if True:
-                    print("------------- Iteration: " + str(k) + " TAU: "+  str(self.tau))
+                    #print("------------- Iteration: " + str(k) + " TAU: "+  str(self.tau))
                     #print("u:\n " + str(u))
                     #print("v:\n " + str(v))
                     fu = self.fun.getValueInX(u)[0,0]
                     fv = self.fun.getValueInX(v)[0,0]
                     quv = self.fun.getQTauValue(self.tau, u, v)[0,0]
                     xlessy = np.linalg.norm(self.x[k] - self.y[k])
-                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
-                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
-                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
-                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
+                    if False:
+                        print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                        print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
+                        print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                        print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
                     if self.saveIterationsToCSV:
                         temp = np.array([[k, self.tau, fu, fv, quv, xlessy]])
                         self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)

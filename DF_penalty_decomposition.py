@@ -116,8 +116,12 @@ class DFPenaltyDecomposition:
                 v = self.y[k]
 
             else:
+                pass
                 u = self.x[0]
                 v = self.y[0]
+            
+            u = self.x[k] 
+            v = self.y[k]
             
             iteration = 0
             while self.getAlfaTildeMax(alfa_tilde) > epsilon: 
@@ -154,7 +158,7 @@ class DFPenaltyDecomposition:
                 
                 if True:
                 
-                    print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
+                    #print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
                     #print("u:\n " + str(u))
                     #print("v:\n " + str(v))
                     fu = self.fun.getValueInX(u)
@@ -162,11 +166,12 @@ class DFPenaltyDecomposition:
                     quv = self.fun.getQTauValue(self.tau, u, v)
                     xlessy = np.linalg.norm(self.x[k] - self.y[k])
                     current_min = min
-                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
-                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
-                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
-                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
-                    print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+                    if False:
+                        print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                        print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
+                        print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                        print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
+                        print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
                     temp = np.array([[k, self.tau, fu, fv, quv, xlessy, current_min]])
                     if self.saveIterationsToCSV:
                         self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)
@@ -297,7 +302,7 @@ class DFPenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose() #ERRORE ERA QUA, NON AVEVO MESSO IL TRANSPOSE!!! ATTENZIONEEEEEE
                 
                 if True:
-                    print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
+                    #print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
                     #print("u:\n " + str(u))
                     #print("v:\n " + str(v))
                     fu = self.fun.getValueInX(u)
@@ -305,11 +310,12 @@ class DFPenaltyDecomposition:
                     quv = self.fun.getQTauValue(self.tau, u, v)
                     xlessy = np.linalg.norm(self.x[k] - self.y[k])
                     current_min = min
-                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
-                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
-                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
-                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
-                    print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+                    if False:
+                        print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                        print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
+                        print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                        print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
+                        print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
                     temp = np.array([[k, self.tau, fu, fv, quv, xlessy, current_min]])
                     if self.saveIterationsToCSV:
                         self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)
@@ -374,7 +380,7 @@ class DFPenaltyDecomposition:
                     writer.writeheader()
         #the following is one iteration of the outer loop (for k=0,1,..)
         k = 0
-        epsilon = 0.01 #TODO provare 10^-4
+        epsilon = 1e-4 #TODO provare 10^-4
         min = 100000000000
         #while k < self.max_iterations: 
         while True:
@@ -403,6 +409,9 @@ class DFPenaltyDecomposition:
             else:
                 u = self.x[0]
                 v = self.y[0]
+            
+            u = self.x[k] 
+            v = self.y[k]
             
             iteration = 0
             while self.getAlfaTildeMax(alfa_tilde) > epsilon: 
@@ -438,7 +447,7 @@ class DFPenaltyDecomposition:
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint).transpose() #ERRORE ERA QUA, NON AVEVO MESSO IL TRANSPOSE!!! ATTENZIONEEEEEE
                 
                 if True:
-                    print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
+                    #print("[DF PD]------------- Iteration: " + str(iteration) + " --k: " + str(k) + " -- tau: " + str(self.tau))
                     #print("u:\n " + str(u))
                     #print("v:\n " + str(v))
                     fu = self.fun.getValueInX(u)
@@ -446,11 +455,12 @@ class DFPenaltyDecomposition:
                     quv = self.fun.getQTauValue(self.tau, u, v)
                     xlessy = np.linalg.norm(self.x[k] - self.y[k])
                     current_min = min
-                    print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
-                    print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
-                    print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
-                    print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
-                    print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+                    if False:
+                        print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                        print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
+                        print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                        print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(xlessy))
+                        print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
                     temp = np.array([[k, self.tau, fu, fv, quv, xlessy, current_min]])
                     if self.saveIterationsToCSV:
                         self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)

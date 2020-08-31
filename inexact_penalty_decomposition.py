@@ -117,7 +117,7 @@ class InexactPenaltyDecomposition:
 
                 if True:
                     if(self.hack):
-                        print("Iteration: " + str(k))
+                        #print("Iteration: " + str(k))
                         #print("u:\n " + str(u))
                         #print("v:\n " + str(v))
                         fu = self.fun.getValueInX(u)[0,0]
@@ -125,12 +125,13 @@ class InexactPenaltyDecomposition:
                         quv = self.fun.getQTauValue(self.tau, u, v)[0,0]
                         lessy = np.linalg.norm(self.x[k] - self.y[k])
                         current_min = min[0,0]
-                        print("TAU VALUE: " + str(self.tau)) 
-                        print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
-                        print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
-                        print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
-                        print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(lessy))
-                        print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
+                        if False:
+                            print("TAU VALUE: " + str(self.tau)) 
+                            print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
+                            print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))
+                            print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))
+                            print("\t\t\t\t\t\t\t\t\t\tNORMA DISTANZA X-Y " + str(lessy))
+                            print("\t\t\t\t\t\t\t\t\t\tCurrent MIN: " + str(min))
                         temp = np.array([[k, self.tau, fu, fv, quv, lessy, current_min]])
                         if self.saveIterationsToCSV:
                             self.iterationSaver = np.append(self.iterationSaver, temp, axis=0)
