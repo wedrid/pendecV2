@@ -1,0 +1,22 @@
+{
+    "crime": {
+        "name": "crime",
+        "shape-x": [
+            1993,
+            102
+        ],
+        "shape-y": [
+            1993,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 1558.3314068126679,
+            "elapsed-variance": 31857.680689539913,
+            "return-val": 352.073152079017,
+            "return-variance": 0.9485324266516075,
+            "min-val": 351.9933461962089,
+            "min-val-variance": 1.023264592345468,
+            "constraint": 25
+        }
+    }
+}

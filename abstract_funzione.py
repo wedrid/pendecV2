@@ -9,24 +9,25 @@ class Funzione:
         return "This is abstract"
     
     def getQTauXArgminGivenY(self, tau, y):
-        return "This is abstract"
+        return "This is abstract (non dovrebbe essere usata da nessuna parte, comunque)"
     
     # TODO this seems to be [BROKEN]
-    def getFeasibleYQTauArgminGivenX(self, tau, x, constraint):
-        self.xTemp = x
-        self.tauTemp = tau
-        ottimo = minimize(self.getValueOfPenalizationTermHelper, x, method='Nelder-Mead')
-        print(ottimo)
-        x = ottimo.x
-        
+    def getFeasibleYQTauArgminGivenX(self, tau, x_temp, constraint):
+        #self.xTemp = x
+        #self.tauTemp = tau
+        #ottimo = minimize(self.getValueOfPenalizationTermHelper, x, method='BFGS')
+        #print(ottimo)
+        #x = ottimo.x
+        x = copy.deepcopy(x_temp)
         self._makeFeasible(x, constraint)
-        print("[getFeasibleYQTauArgminGivenX] -> " + str(x))
+        #print("[getFeasibleYQTauArgminGivenX] -> " + str(x))
+        x = np.array(x).T
         return x
 
     
     def getValueOfPenalizationTermHelper(self, y):
-        print(self.xTemp)
-        print(y)
+        #print(self.xTemp)
+        #print(y)
         return np.linalg.norm(self.xTemp-y)**2
 
     def getValueOfPenalizationTerm(self, tau, x, y): #TODO check
@@ -40,13 +41,13 @@ class Funzione:
 
     def getQTauOttimoGivenY(self, tau, y, x0): #x0 è da dove inizia la ricerca
         #general implementation
-        self.yTemp = np.matrix(y)
+        self.yTemp = y
         self.tauTemp = tau
         #print("y = " + str(self.yTemp) + " x0 = " + str(x0))
-        ottimo = minimize(self.qTauValueHelper, x0, jac=self.qTauGradHelper, method='BFGS')
+        ottimo = minimize(self.qTauValueHelper, x0, method='BFGS')
         #ottimo = minimize(self.qTauValueHelper, x0, method='Nelder-Mead')
-
-        return ottimo
+        x = np.array([ottimo.x]).T
+        return x
 
     def getQTauValue(self, tau, x, y):
         firstMember = self.getValueInX(x)

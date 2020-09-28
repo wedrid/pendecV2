@@ -116,23 +116,23 @@ class PenaltyDecomposition:
                 #primo blocco
                 
                 u = self.fun.getQTauOttimoGivenY(self.tau, v, np.matrix(np.ones(self.fun.number_of_x)))
-                #u = np.matrix(u).transpose()
-                #print("u -┐\n" + str(u))
-                #print("Q TAU VALUE is " + str(self.fun.getQTauValue(self.tau, u, v)))
+                #print("Questo è u ottimo non feasible --> \n" + str(u))
 
                 #secondo blocco 
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
                 v = np.matrix(v).transpose()
+                #print("QUESTO E' V ottimo feasible --> \n" + str(v))
 
                 if True:
                     #print("------------- Iteration: " + str(k) + " TAU: "+  str(self.tau))
                     #print("u:\n " + str(u))
                     #print("v:\n " + str(v))
-                    fu = self.fun.getValueInX(u)[0,0]
-                    fv = self.fun.getValueInX(v)[0,0]
-                    quv = self.fun.getQTauValue(self.tau, u, v)[0,0]
+                    print("#:" + str(len(self.x)))
+                    fu = self.fun.getValueInX(u)
+                    fv = self.fun.getValueInX(v)
+                    quv = self.fun.getQTauValue(self.tau, u, v)
                     xlessy = np.linalg.norm(self.x[k] - self.y[k])
-                    if False:
+                    if True:
                         print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
                         print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(fv))
                         print("\t\t\t\t\t\t\t\t\t\tq(u,v) " + str(quv))

@@ -1,4 +1,6 @@
 from abstract_funzione import *
+from scipy import optimize
+
 
 class RegressioneLineare(Funzione):
 
@@ -46,7 +48,11 @@ class RegressioneLineare(Funzione):
             return None
         firstMember = np.dot(np.dot(self.A.transpose(), self.A), x)
         secondMember = -1 * np.dot(self.A.transpose(), self.b)
-        return (firstMember + secondMember)
+        gradient = firstMember + secondMember
+        #grad = optimize.approx_fprime(x, self.getValueInX, 1e-6)
+
+
+        return gradient
 
 
     def getQTauXGradient(self, tau, x, y):

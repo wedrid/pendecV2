@@ -23,7 +23,7 @@ class Armijo:
 
         alfa = cls.delta_k
         #La direzione dell'antigradiente è in discesa
-        direzione = -1* fun.getQTauXGradient(tau, x, y)
+        direzione = -1 * fun.getQTauXGradient(tau, x, y)
 
         #print("Direzione: ")
         #print(direzione)
@@ -38,6 +38,7 @@ class Armijo:
         j = 0
         #print(fun.evaluate_function( x + alfa * direzione))
         while alfa > 1e-6 and fun.getQTauValue(tau, x + np.dot(alfa, direzione), y) > fun.getQTauValue(tau, x, y) + cls.gamma*alfa*(np.dot(fun.getQTauXGradient(tau, x, y).transpose(), direzione)):
+            
             alfa = cls.delta*alfa
             j+=1 #anche se in realtà non serve funzionalmente.. può però dire in quante iterazioni è terminato l'algoritmo
         

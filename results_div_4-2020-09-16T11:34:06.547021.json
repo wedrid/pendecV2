@@ -1,0 +1,36 @@
+{
+    "servo": {
+        "name": "servo",
+        "shape-x": [
+            167,
+            19
+        ],
+        "shape-y": [
+            167,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 18.39980623245239,
+            "return-val": 34.19634249632524,
+            "min-val": 34.07129090318548,
+            "constraint": 4
+        }
+    },
+    "housing": {
+        "name": "housing",
+        "shape-x": [
+            506,
+            13
+        ],
+        "shape-y": [
+            506,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 11.507955522537232,
+            "return-val": 89.39709215570079,
+            "min-val": 85.64611455741013,
+            "constraint": 3
+        }
+    }
+}

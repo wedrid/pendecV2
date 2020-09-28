@@ -87,7 +87,8 @@ class InexactPenaltyDecomposition:
             y_temp = copy.deepcopy(self.y[k])
             alfa = Armijo.armijoOnQTau(self.fun, tau = self.tau, x_in=x_temp, y_in=y_temp)
             #alfa = DFLineSearch.lineSearchOnQTau(self.fun, tau = self.tau)
-            x_trial = x_temp - alfa * self.fun.getQTauXGradient(self.tau, x_temp, y_temp)
+            grad = self.fun.getQTauXGradient(self.tau, x_temp, y_temp)
+            x_trial = x_temp - alfa * grad
 
             if self.fun.getQTauValue(self.tau, x_trial, y_temp) <= self.fun.getValueInX(self.x[0]):
                 u = copy.deepcopy(self.x[k])
@@ -100,10 +101,14 @@ class InexactPenaltyDecomposition:
             #while self.fun.getQTauXGradientNorm(self.tau, u, v) > epsilon:
             qTauValPrev = self.fun.getQTauValue(self.tau, u, v)
             
-
+            q = 0
             while True: 
                 #primo blocco
                 alfa = Armijo.armijoOnQTau(self.fun, tau = self.tau, x_in=u, y_in=v)
+                print("Passato " + str(q))
+                q+=1
+                
+                
                 #alfa = LineSea
                 #print("ALFA: " + str(alfa))
                 u = u - alfa * self.fun.getQTauXGradient(self.tau, u, v)
@@ -111,21 +116,22 @@ class InexactPenaltyDecomposition:
                 #print("u -┐\n" + str(u))
                 #print("Q TAU VALUE is " + str(self.fun.getQTauValue(self.tau, u, v)))
 
-                #secondo blocco 
+                #secondo blocco
                 v = self.fun.getFeasibleYQTauArgminGivenX(self.tau, u, self.l0_constraint)
-                v = np.matrix(v).transpose()
+                v = np.array(v).T
+                #print("V IS " + str(v))
 
                 if True:
-                    if(self.hack):
+                    if(True):
                         #print("Iteration: " + str(k))
                         #print("u:\n " + str(u))
                         #print("v:\n " + str(v))
-                        fu = self.fun.getValueInX(u)[0,0]
-                        fv = self.fun.getValueInX(v)[0,0]
-                        quv = self.fun.getQTauValue(self.tau, u, v)[0,0]
+                        fu = self.fun.getValueInX(u)
+                        fv = self.fun.getValueInX(v)
+                        quv = self.fun.getQTauValue(self.tau, u, v)
                         lessy = np.linalg.norm(self.x[k] - self.y[k])
-                        current_min = min[0,0]
-                        if False:
+                        current_min = min
+                        if True:
                             print("TAU VALUE: " + str(self.tau)) 
                             print("\t\t\t\t\t\t\t\t\t\tf(u) " + str(fu))
                             print("\t\t\t\t\t\t\t\t\t\tf(v) " + str(self.fun.getValueInX(v)))

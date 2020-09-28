@@ -1,0 +1,122 @@
+{
+    "servo": {
+        "name": "servo",
+        "shape-x": [
+            167,
+            19
+        ],
+        "shape-y": [
+            167,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 28.074954957962035,
+            "elapsed-variance": 29.967430307726012,
+            "return-val": 33.365607525699595,
+            "return-variance": 2.14069590339826,
+            "min-val": 33.33226416709695,
+            "min-val-variance": 1.944505477132409,
+            "constraint": 4
+        }
+    },
+    "housing": {
+        "name": "housing",
+        "shape-x": [
+            506,
+            13
+        ],
+        "shape-y": [
+            506,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 14.778385543823243,
+            "elapsed-variance": 1.8012026293508494,
+            "return-val": 89.39718450640717,
+            "return-variance": 2.2239485620537903e-08,
+            "min-val": 86.11060333716698,
+            "min-val-variance": 12.613351510770517,
+            "constraint": 3
+        }
+    },
+    "forest-fires": {
+        "name": "forest-fires",
+        "shape-x": [
+            517,
+            63
+        ],
+        "shape-y": [
+            517,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 304.34109986305236,
+            "elapsed-variance": 16586.83111212975,
+            "return-val": 247.84074467792897,
+            "return-variance": 0.14949748790349568,
+            "min-val": 247.71231662002825,
+            "min-val-variance": 0.02271316257218706,
+            "constraint": 15
+        }
+    },
+    "breast-cancer": {
+        "name": "breast-cancer",
+        "shape-x": [
+            194,
+            33
+        ],
+        "shape-y": [
+            194,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 154.84303873062134,
+            "elapsed-variance": 1497.0094876700823,
+            "return-val": 76.97895483173114,
+            "return-variance": 2.667257913753816e-08,
+            "min-val": 75.83139578681288,
+            "min-val-variance": 1.8351491564983788,
+            "constraint": 8
+        }
+    },
+    "auto-mpg": {
+        "name": "auto-mpg",
+        "shape-x": [
+            392,
+            25
+        ],
+        "shape-y": [
+            392,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 61.73263299942017,
+            "elapsed-variance": 755.5657472549901,
+            "return-val": 39.37401882260977,
+            "return-variance": 2.27964347093017e-09,
+            "min-val": 38.83040637085787,
+            "min-val-variance": 1.2250980207502162,
+            "constraint": 6
+        }
+    },
+    "automobile": {
+        "name": "automobile",
+        "shape-x": [
+            159,
+            65
+        ],
+        "shape-y": [
+            159,
+            1
+        ],
+        "dfpd_randomized_step": {
+            "elapsed-time": 172.59719792366027,
+            "elapsed-variance": 3622.8712648275846,
+            "return-val": 5.110359878371745,
+            "return-variance": 1.5248986262209505,
+            "min-val": 5.102970048590479,
+            "min-val-variance": 1.5212278529055066,
+            "constraint": 16
+        }
+    }
+}
